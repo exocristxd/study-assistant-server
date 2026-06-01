@@ -189,7 +189,7 @@ app.post("/chat-with-notes", async (req, res) => {
       const trimmed = trimText(notesText, 3000);
       prompt = `You are an AI study assistant. A student is asking you a question.
 First check the notes below. If the answer is there, answer from the notes.
-If the answer is NOT in the notes, answer from your own general knowledge .
+If the answer is NOT in the notes, answer from your own general knowledge and mention: "This wasn't in your notes, but here is what I know:".
 Never say you cannot answer — always help the student.
 
 NOTES:
