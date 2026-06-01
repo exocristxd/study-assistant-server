@@ -9,7 +9,7 @@ const { AccessToken } = require("livekit-server-sdk");
 require("dotenv").config();
 
 const app = express();
-app.use(cors({ origin: "http://localhost:3000" }));
+app.use(cors({ origin: "*" }));
 app.use(express.json());
 
 const upload = multer({ dest: "uploads/" });
@@ -257,7 +257,7 @@ app.post("/voice-ask", async (req, res) => {
   try {
     const { transcript } = req.body;
     if (!transcript) return res.status(400).json({ error: "No transcript provided" });
-    if (!notesText) return res.status(400).json({ error: "Upload a PDF first" });
+    
 
     console.log("Voice question:", transcript);
 
