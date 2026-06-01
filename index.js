@@ -9,7 +9,7 @@ const { AccessToken } = require("livekit-server-sdk");
 require("dotenv").config();
 
 const app = express();
-app.use(cors({ origin: "*" }));
+app.use(cors({ origin: "http://localhost:3000" }));
 app.use(express.json());
 
 const upload = multer({ dest: "uploads/" });
@@ -181,21 +181,28 @@ ${trimmed}
 app.post("/chat-with-notes", async (req, res) => {
   try {
     const { question } = req.body;
-    if (!notesText) return res.status(400).json({ error: "Upload a PDF first" });
-    const trimmed = trimText(notesText, 3000);
-    const answer = await getAIResponse(`
-You are an AI study assistant. A student is asking you a question.
+    if (!question) return res.status(400).json({ error: "No question provided" });
 
+    let prompt = "";
+
+    if (notesText) {
+      const trimmed = trimText(notesText, 3000);
+      prompt = `You are an AI study assistant. A student is asking you a question.
 First check the notes below. If the answer is there, answer from the notes.
-If the answer is NOT in the notes, answer from your own general knowledge and mention:
-"This wasn't in your notes, but here is what I know:".
+If the answer is NOT in the notes, answer from your own general knowledge and mention: "This wasn't in your notes, but here is what I know:".
 Never say you cannot answer — always help the student.
 
 NOTES:
 ${trimmed}
 
-QUESTION: ${question}
-`);
+QUESTION: ${question}`;
+    } else {
+      prompt = `You are a helpful AI study assistant. Answer this student question clearly and concisely using your general knowledge:
+
+QUESTION: ${question}`;
+    }
+
+    const answer = await getAIResponse(prompt);
     res.json({ answer });
   } catch (error) {
     console.error("CHAT ERROR:", error.message);
@@ -258,7 +265,7 @@ app.post("/voice-ask", async (req, res) => {
     const answer = await getAIResponse(`
 You are an AI study assistant speaking out loud. Keep your answer SHORT (2-3 sentences max) and clear.
 First check the notes. If found, answer from notes.
-If NOT in the notes, answer from your general knowledge.
+If NOT in the notes, answer from your general knowledge and start with "This wasn't in your notes, but:".
 Always give an answer — never refuse.
 
 NOTES:
